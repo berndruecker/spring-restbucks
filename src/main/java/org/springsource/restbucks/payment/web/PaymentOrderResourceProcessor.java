@@ -18,6 +18,8 @@ package org.springsource.restbucks.payment.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
@@ -42,12 +44,14 @@ class PaymentOrderResourceProcessor implements ResourceProcessor<Resource<Order>
 	public Resource<Order> process(Resource<Order> resource) {
 
 		Order order = resource.getContent();
+		
+		Collection<String> links = order.getPossibleLinks("PAYMENT");
 
-		if (!order.isPaid()) {
+		if (links.contains("pay")) {
 			resource.add(paymentLinks.getPaymentLink(order));
 		}
 
-		if (order.isReady()) {
+		if (links.contains("receipt")) {
 			resource.add(paymentLinks.getReceiptLink(order));
 		}
 

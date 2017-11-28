@@ -70,9 +70,10 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.PAYMENT, method = PUT)
 	ResponseEntity<?> submitPayment(@PathVariable("id") Order order, @RequestBody CreditCardNumber number) {
 
-		if (order == null || order.isPaid()) {
-			return ResponseEntity.notFound().build();
-		}
+//		if (order == null || order.isPaid()) {
+//			return ResponseEntity.notFound().build();
+//		}
+	  // Let's assume the payment service takes care of this hisself correctly
 
 		CreditCardPayment payment = paymentService.pay(order, number);
 
@@ -91,9 +92,10 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.RECEIPT, method = GET)
 	HttpEntity<?> showReceipt(@PathVariable("id") Order order) {
 
-		if (order == null || !order.isPaid() || order.isTaken()) {
-			return ResponseEntity.notFound().build();
-		}
+	  // Do we really need this differentiation? Wouldn't just a "no payment there" be sufficient?
+//		if (order == null || !order.isPaid() || order.isTaken()) {
+//			return ResponseEntity.notFound().build();
+//		}
 
 		return paymentService.getPaymentFor(order).//
 				map(payment -> createReceiptResponse(payment.getReceipt())).//
@@ -109,10 +111,11 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.RECEIPT, method = DELETE)
 	HttpEntity<?> takeReceipt(@PathVariable("id") Order order) {
 
-		if (order == null || !order.isPaid()) {
-			return ResponseEntity.notFound().build();
-		}
+//		if (order == null || !order.isPaid()) {
+//			return ResponseEntity.notFound().build();
+//		}
 
+	  // the service only works well if in right state!
 		return paymentService.takeReceiptFor(order).//
 				map(receipt -> createReceiptResponse(receipt)).//
 				orElseGet(() -> new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED));
@@ -132,7 +135,7 @@ public class PaymentController {
 		Resource<Receipt> resource = new Resource<>(receipt);
 		resource.add(entityLinks.linkToSingleResource(order));
 
-		if (!order.isTaken()) {
+		if (order.getPossibleLinks("PAYMENT").contains("receipt")) {
 			resource.add(entityLinks.linkForSingleResource(order).slash("receipt").withSelfRel());
 		}
 

@@ -15,6 +15,8 @@
  */
 package org.springsource.restbucks.order.web;
 
+import org.camunda.bpm.engine.ProcessEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.event.AbstractRepositoryEventListener;
 import org.springframework.stereotype.Component;
 import org.springsource.restbucks.order.Order;
@@ -26,6 +28,9 @@ import org.springsource.restbucks.order.Order;
  */
 @Component
 class OrderControllerEventListener extends AbstractRepositoryEventListener<Order> {
+  
+  @Autowired
+  private ProcessEngine stateMachine;
 
 	/* 
 	 * (non-Javadoc)
@@ -33,9 +38,9 @@ class OrderControllerEventListener extends AbstractRepositoryEventListener<Order
 	 */
 	@Override
 	protected void onBeforeDelete(Order order) {
-
-		if (order.isPaid()) {
-			throw new OrderAlreadyPaidException();
-		}
+	  stateMachine.getRuntimeService()
+	    .createMessageCorrelation("Message_DELETE")
+	    .processInstanceBusinessKey(String.valueOf(order.getId()))
+	    .correlate();
 	}
 }

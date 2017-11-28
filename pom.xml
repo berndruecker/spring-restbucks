@@ -17,7 +17,21 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 
 	<properties>
 		<java.version>1.8</java.version>
+		<camunda.version>7.8.0-alpha6-ee</camunda.version>
+		<camundaSpringBoot.version>2.3.0-alpha2</camundaSpringBoot.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.camunda.bpm</groupId>
+				<artifactId>camunda-bom</artifactId>
+				<version>${camunda.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -64,6 +78,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 			<artifactId>hsqldb</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		
+		<!-- State machine -->
+		
+	
+	    <dependency>
+	      <groupId>org.camunda.bpm.springboot</groupId>
+	      <artifactId>camunda-bpm-spring-boot-starter-rest</artifactId>
+	      <version>${camundaSpringBoot.version}</version>
+	    </dependency>
+		
 
 		<!-- Misc -->
 

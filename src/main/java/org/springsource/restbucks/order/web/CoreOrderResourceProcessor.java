@@ -18,6 +18,8 @@ package org.springsource.restbucks.order.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
@@ -47,9 +49,12 @@ class CoreOrderResourceProcessor implements ResourceProcessor<Resource<Order>> {
 	public Resource<Order> process(Resource<Order> resource) {
 
 		Order order = resource.getContent();
+		Collection<String> links = order.getPossibleLinks("ORDER");
 
-		if (!order.isPaid()) {
+		if (links.contains("cancel")) {
 			resource.add(entityLinks.linkForSingleResource(order).withRel(CANCEL_REL));
+		}
+    if (links.contains("update")) {
 			resource.add(entityLinks.linkForSingleResource(order).withRel(UPDATE_REL));
 		}
 

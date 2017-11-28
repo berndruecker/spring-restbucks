@@ -48,10 +48,12 @@ class PaymentServiceImpl implements PaymentService {
 	 */
 	@Override
 	public CreditCardPayment pay(Order order, CreditCardNumber creditCardNumber) {
-
-		if (order.isPaid()) {
-			throw new PaymentException(order, "Order already paid!");
-		}
+	  // Would throw exception if not ready to take payment
+	  order.markPaid();
+//
+//		if (order.isPaid()) {
+//			throw new PaymentException(order, "Order already paid!");
+//		}
 
 		// Using Optional.orElseThrow(…) doesn't work due to https://bugs.openjdk.java.net/browse/JDK-8054569
 		Optional<CreditCard> creditCardResult = creditCardRepository.findByNumber(creditCardNumber);
@@ -70,7 +72,7 @@ class PaymentServiceImpl implements PaymentService {
 
 		CreditCardPayment payment = paymentRepository.save(new CreditCardPayment(creditCard, order));
 
-		orderRepository.save(order.markPaid());
+		orderRepository.save(order);
 
 		return payment;
 	}
