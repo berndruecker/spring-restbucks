@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.money.MonetaryAmount;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.support.DomainClassConverter;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springsource.restbucks.order.Order;
+import org.springsource.restbucks.order.OrderService;
 import org.springsource.restbucks.payment.CreditCard;
 import org.springsource.restbucks.payment.CreditCardNumber;
 import org.springsource.restbucks.payment.CreditCardPayment;
@@ -57,6 +59,9 @@ public class PaymentController {
 
 	private final @NonNull PaymentService paymentService;
 	private final @NonNull EntityLinks entityLinks;
+	
+  @Autowired
+  private OrderService orderService;
 
 	/**
 	 * Accepts a payment for an {@link Order}
@@ -70,9 +75,10 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.PAYMENT, method = PUT)
 	ResponseEntity<?> submitPayment(@PathVariable("id") Order order, @RequestBody CreditCardNumber number) {
 
-		if (order == null || order.isPaid()) {
-			return ResponseEntity.notFound().build();
-		}
+//		if (order == null || order.isPaid()) {
+//			return ResponseEntity.notFound().build();
+//		}
+	  // Let's assume the payment service takes care of this hisself correctly
 
 		CreditCardPayment payment = paymentService.pay(order, number);
 
@@ -91,9 +97,10 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.RECEIPT, method = GET)
 	HttpEntity<?> showReceipt(@PathVariable("id") Order order) {
 
-		if (order == null || !order.isPaid() || order.isTaken()) {
-			return ResponseEntity.notFound().build();
-		}
+	  // Do we really need this differentiation? Wouldn't just a "no payment there" be sufficient?
+//		if (order == null || !order.isPaid() || order.isTaken()) {
+//			return ResponseEntity.notFound().build();
+//		}
 
 		return paymentService.getPaymentFor(order).//
 				map(payment -> createReceiptResponse(payment.getReceipt())).//
@@ -109,10 +116,11 @@ public class PaymentController {
 	@RequestMapping(path = PaymentLinks.RECEIPT, method = DELETE)
 	HttpEntity<?> takeReceipt(@PathVariable("id") Order order) {
 
-		if (order == null || !order.isPaid()) {
-			return ResponseEntity.notFound().build();
-		}
+//		if (order == null || !order.isPaid()) {
+//			return ResponseEntity.notFound().build();
+//		}
 
+	  // the service only works well if in right state!
 		return paymentService.takeReceiptFor(order).//
 				map(receipt -> createReceiptResponse(receipt)).//
 				orElseGet(() -> new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED));
@@ -132,7 +140,7 @@ public class PaymentController {
 		Resource<Receipt> resource = new Resource<>(receipt);
 		resource.add(entityLinks.linkToSingleResource(order));
 
-		if (!order.isTaken()) {
+		if (orderService.getPossibleLinks(order, "PAYMENT").contains("receipt")) {
 			resource.add(entityLinks.linkForSingleResource(order).slash("receipt").withSelfRel());
 		}
 

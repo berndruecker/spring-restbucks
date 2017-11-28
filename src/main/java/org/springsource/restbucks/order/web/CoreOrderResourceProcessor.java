@@ -18,11 +18,15 @@ package org.springsource.restbucks.order.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 import org.springsource.restbucks.order.Order;
+import org.springsource.restbucks.order.OrderService;
 
 /**
  * {@link ResourceProcessor} implementation to add links to the {@link Order} representation that indicate that the
@@ -38,6 +42,9 @@ class CoreOrderResourceProcessor implements ResourceProcessor<Resource<Order>> {
 	public static final String UPDATE_REL = "update";
 
 	private final @NonNull EntityLinks entityLinks;
+	
+	@Autowired
+	private OrderService orderService;
 
 	/* 
 	 * (non-Javadoc)
@@ -47,9 +54,12 @@ class CoreOrderResourceProcessor implements ResourceProcessor<Resource<Order>> {
 	public Resource<Order> process(Resource<Order> resource) {
 
 		Order order = resource.getContent();
+		Collection<String> links = orderService.getPossibleLinks(order, "ORDER");
 
-		if (!order.isPaid()) {
+		if (links.contains("cancel")) {
 			resource.add(entityLinks.linkForSingleResource(order).withRel(CANCEL_REL));
+		}
+    if (links.contains("update")) {
 			resource.add(entityLinks.linkForSingleResource(order).withRel(UPDATE_REL));
 		}
 

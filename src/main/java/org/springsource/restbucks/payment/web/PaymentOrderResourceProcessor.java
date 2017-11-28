@@ -18,10 +18,14 @@ package org.springsource.restbucks.payment.web;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.stereotype.Component;
 import org.springsource.restbucks.order.Order;
+import org.springsource.restbucks.order.OrderService;
 
 /**
  * {@link ResourceProcessor} to enrich {@link Order} {@link Resource}s with links to the {@link PaymentController}.
@@ -33,6 +37,9 @@ import org.springsource.restbucks.order.Order;
 class PaymentOrderResourceProcessor implements ResourceProcessor<Resource<Order>> {
 
 	private final @NonNull PaymentLinks paymentLinks;
+	
+  @Autowired
+  private OrderService orderService;
 
 	/* 
 	 * (non-Javadoc)
@@ -42,12 +49,14 @@ class PaymentOrderResourceProcessor implements ResourceProcessor<Resource<Order>
 	public Resource<Order> process(Resource<Order> resource) {
 
 		Order order = resource.getContent();
+		
+		Collection<String> links = orderService.getPossibleLinks(order, "PAYMENT");
 
-		if (!order.isPaid()) {
+		if (links.contains("pay")) {
 			resource.add(paymentLinks.getPaymentLink(order));
 		}
 
-		if (order.isReady()) {
+		if (links.contains("receipt")) {
 			resource.add(paymentLinks.getReceiptLink(order));
 		}
 
