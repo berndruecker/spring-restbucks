@@ -5,11 +5,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.camunda.bpm.engine.MismatchingMessageCorrelationException;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.runtime.ActivityInstance;
 import org.camunda.bpm.engine.runtime.EventSubscription;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +28,31 @@ public class OrderService {
 
   @Autowired
   private ProcessEngine engine;
+  
+  // @PostConstruct - use EITHER this OR the BPMN file
+  public void defineFlow() {
+    // @formatter:off
+    BpmnModelInstance orderFlow = Bpmn.createExecutableProcess("order")
+     .startEvent() //
+     .receiveTask("PaymentExpected").message("Message_PAYMENT_pay")
+       .boundaryEvent("Update").message("Message_ORDER_update")
+         .connectTo("PaymentExpected")
+       .moveToActivity("PaymentExpected")
+         .boundaryEvent("Cancel").message("Message_ORDER_cancel")
+         .endEvent()
+       .moveToActivity("PaymentExpected")
+     .receiveTask("Paid").message("Message_ORDER_START_PREPARATION")
+     .receiveTask("Preparing").message("Message_ORDER_PREPARED")
+     .receiveTask("Ready").message("Message_PAYMENT_receipt")
+     .endEvent().done();
+    // @formatter:on
+    
+    System.out.println(Bpmn.convertToString(orderFlow));
+    
+    engine.getRepositoryService().createDeployment() //
+      .addModelInstance("order.bpmn", orderFlow) //
+      .deploy();
+  }  
   
   public void createNewOrder(Order o) {
     o = repository.save(o);

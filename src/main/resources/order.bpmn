@@ -31,10 +31,6 @@
       <bpmn:incoming>SequenceFlow_09iyi48</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1l4iu8a</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:boundaryEvent id="BoundaryEvent_1isubih" name="UPDATE" cancelActivity="false" attachedToRef="Task_06i2myw">
-      <bpmn:outgoing>SequenceFlow_0u26e8h</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_0vv3iys" />
-    </bpmn:boundaryEvent>
     <bpmn:endEvent id="EndEvent_0gzxj2z" name="Delivered">
       <bpmn:extensionElements>
         <camunda:executionListener delegateExpression="#{setOrderStatus}" event="start" />
@@ -65,6 +61,10 @@
       </bpmn:extensionElements>
       <bpmn:outgoing>SequenceFlow_0motra0</bpmn:outgoing>
     </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_1isubih" name="UPDATE" attachedToRef="Task_06i2myw">
+      <bpmn:outgoing>SequenceFlow_0u26e8h</bpmn:outgoing>
+      <bpmn:messageEventDefinition />
+    </bpmn:boundaryEvent>
     <bpmn:textAnnotation id="TextAnnotation_01te98p">    <bpmn:text>Wait for receipt to be taken</bpmn:text>
 </bpmn:textAnnotation>
     <bpmn:association id="Association_0yy09me" sourceRef="Task_1qs4yon" targetRef="TextAnnotation_01te98p" />
@@ -142,12 +142,6 @@
       <bpmndi:BPMNShape id="ReceiveTask_0iyq4nf_di" bpmnElement="Task_1qs4yon">
         <dc:Bounds x="888" y="46" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryEvent_1f2arhd_di" bpmnElement="BoundaryEvent_1isubih">
-        <dc:Bounds x="243" y="28" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="239" y="3" width="44" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0gzxj2z_di" bpmnElement="EndEvent_0gzxj2z">
         <dc:Bounds x="1047" y="68" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -220,6 +214,12 @@
         <di:waypoint xsi:type="dc:Point" x="804" y="46" />
         <di:waypoint xsi:type="dc:Point" x="820" y="11" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_193igdu_di" bpmnElement="BoundaryEvent_1isubih">
+        <dc:Bounds x="243" y="28" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="239" y="3" width="45" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
